@@ -11,6 +11,12 @@ class Announcement < Edition
   def self.sti_names
     ([self] + descendants).map { |model| model.sti_name }
   end
+
+  include Tire::Model::Search
+  include Tire::Model::Callbacks
+
+  index_name "whitehall_announcements"
+
 end
 
 require_relative 'news_article'
