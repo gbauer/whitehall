@@ -9,7 +9,7 @@ class Speech < Announcement
 
   delegate :genus, :explanation, to: :speech_type
 
-  tire.index_name 'announcements'
+  tire.index_name 'whitehall_announcements'
 
   def speech_type
     SpeechType.find_by_id(speech_type_id)
@@ -29,6 +29,22 @@ class Speech < Announcement
 
   def delivery_title
     role_appointment.role.ministerial? ? "Minister" : "Speaker"
+  end
+
+  def to_indexed_json
+    {
+      state: state,
+      timestamp_for_sorting: timestamp_for_sorting,
+      delivered_on: delivered_on,
+      first_published_at: first_published_at,
+      organisations: organisations.map(&:id),
+      people: [person.id],
+      speech_type: speech_type.id,
+      topics: topics.map(&:id),
+      title: title,
+      description: summary,
+      content: indexable_content,
+    }.to_json
   end
 
   private

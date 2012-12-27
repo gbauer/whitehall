@@ -5,8 +5,29 @@ class AnnouncementsController < PublicFacingController
   respond_to :atom, only: :index
 
   class AnnouncementDecorator < SimpleDelegator
+    def search
+      __getobj__.published_search.results
+    end
     def documents
-      AnnouncementPresenter.decorate(__getobj__.documents)
+      AnnouncementPresenter.decorate(__getobj__.published_search.results)
+    end
+    def count
+      search.total_entries
+    end
+    def current_page
+      search.current_page
+    end
+    def num_pages
+      search.total_pages
+    end
+    def total_count
+      search.results
+    end
+    def last_page?
+      search.last_page?
+    end
+    def first_page?
+      search.first_page?
     end
   end
 
@@ -17,7 +38,8 @@ class AnnouncementsController < PublicFacingController
     clean_malformed_params_array(:departments)
     document_filter = Whitehall::DocumentFilter.new(all_announcements, params)
     expire_on_next_scheduled_publication(scheduled_announcements)
-    @filter = AnnouncementDecorator.new(document_filter)
+    search = Whitehall::AnnouncementSearch.new(params)
+    @filter = AnnouncementDecorator.new(search)
 
     respond_to do |format|
       format.html
@@ -25,7 +47,7 @@ class AnnouncementsController < PublicFacingController
         render json: AnnouncementFilterJsonPresenter.new(@filter)
       end
       format.atom do
-        @announcements = @filter.documents.sort_by(&:timestamp_for_sorting).reverse
+        @announcements = @filter.documents
       end
     end
   end

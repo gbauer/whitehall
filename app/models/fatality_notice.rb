@@ -20,7 +20,7 @@ class FatalityNotice < Announcement
 
   add_trait CasualtiesTrait
   
-  tire.index_name 'announcements'
+  tire.index_name 'whitehall_announcements'
 
   def has_operational_field?
     true
