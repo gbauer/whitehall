@@ -340,6 +340,8 @@ GEM
       multi_json (~> 1.0)
       rake
       rest-client (~> 1.6)
+    tire-contrib (0.1.1)
+      tire
     transitions (0.0.13)
     treetop (1.4.10)
       polyglot
@@ -426,6 +428,7 @@ DEPENDENCIES
   thin (= 1.5.0)
   timecop
   tire
+  tire-contrib
   transitions
   uglifier
   unicorn
