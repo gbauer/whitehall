@@ -15,8 +15,6 @@ class Announcement < Edition
   include Tire::Model::Search
   include Tire::Model::Callbacks
 
-  index_name "whitehall_announcements"
-
 end
 
 require_relative 'news_article'

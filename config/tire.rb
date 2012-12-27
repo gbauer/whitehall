@@ -5,3 +5,5 @@ elsif Rails.env.development?
 else
   Tire.configure {url "http://localhost:9200"}
 end
+
+Tire::Model::Search.index_prefix "whitehall_#{Rails.env}"
