@@ -5,7 +5,7 @@ class Whitehall::AnnouncementSearch
     @params = params
     @per_page = params[:per_page] || 20
     @page = params[:page]
-    @direction = params[:direction] || "before"
+    @direction = params[:direction]
     @date = parse_date
   end
 
