@@ -10,7 +10,7 @@ class Whitehall::AnnouncementSearch
   end
 
   def published_search
-    Tire.search "whitehall_announcements", load: true, per_page: @per_page, page: @page do |search|
+    Tire.search "whitehall_announcements", load: true do |search|
 
       search.query { all }
      
@@ -21,10 +21,12 @@ class Whitehall::AnnouncementSearch
           search.filter :range, timestamp_for_sorting: {to: @date - 1.day}
           search.sort { by :timestamp_for_sorting, :desc }
         when "after"
-          search.filter :range, timestamp_for_sorting: {from: @date + 1.month}
+          search.filter :range, timestamp_for_sorting: {from: @date }
           search.sort { by :timestamp_for_sorting}
         end
       end
+      search.size @per_page
+      search.from( @page.to_i <= 1 ? 0 : (@per_page.to_i * (@page.to_i-1)) )
     end
   end
 

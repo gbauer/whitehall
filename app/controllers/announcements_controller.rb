@@ -12,7 +12,7 @@ class AnnouncementsController < PublicFacingController
       AnnouncementPresenter.decorate(__getobj__.published_search.results)
     end
     def count
-      search.total_entries
+      search.results.count
     end
     def current_page
       search.current_page
@@ -21,7 +21,7 @@ class AnnouncementsController < PublicFacingController
       search.total_pages
     end
     def total_count
-      search.results
+      search.total_entries
     end
     def last_page?
       search.last_page?
@@ -33,6 +33,7 @@ class AnnouncementsController < PublicFacingController
 
   def index
     params[:page] ||= 1
+    params[:date] ||= (Date.today + 1.month).beginning_of_month.to_s
     params[:direction] ||= "before"
     clean_malformed_params_array(:topics)
     clean_malformed_params_array(:departments)
