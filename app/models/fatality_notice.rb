@@ -19,6 +19,8 @@ class FatalityNotice < Announcement
   validates :operational_field, presence: true
 
   add_trait CasualtiesTrait
+  
+  tire.index_name 'announcements'
 
   def has_operational_field?
     true

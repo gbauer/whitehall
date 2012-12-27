@@ -9,6 +9,8 @@ class Speech < Announcement
 
   delegate :genus, :explanation, to: :speech_type
 
+  tire.index_name 'announcements'
+
   def speech_type
     SpeechType.find_by_id(speech_type_id)
   end
