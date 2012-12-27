@@ -1,17 +1,30 @@
 class Whitehall::AnnouncementSearch
-  attr_reader :page
+  attr_reader :page, :direction, :date
 
   def initialize(params = {})
     @params = params
     @per_page = params[:per_page] || 20
     @page = params[:page]
+    @direction = params[:direction] || "before"
+    @date = parse_date
   end
+
   def published_search
-    Tire.search "whitehall_announcements", load: true, per_page: @per_page, page: @page do
-      query { all }
+    Tire.search "whitehall_announcements", load: true, per_page: @per_page, page: @page do |search|
+
+      search.query { all }
      
-      filter :term, state: "published"
-      sort { by :timestamp_for_sorting, "desc" }
+      search.filter :term, state: "published"
+      if @date.present? && @direction.present?
+        case @direction
+        when "before"
+          search.filter :range, timestamp_for_sorting: {to: @date - 1.day}
+          search.sort { by :timestamp_for_sorting, :desc }
+        when "after"
+          search.filter :range, timestamp_for_sorting: {from: @date + 1.month}
+          search.sort { by :timestamp_for_sorting}
+        end
+      end
     end
   end
 
@@ -61,17 +74,13 @@ class Whitehall::AnnouncementSearch
     end
   end
 
-  def direction
-    @params[:direction]
-  end
-
-  def date
+  def parse_date
     Date.parse(@params[:date]) if @params[:date].present?
-  rescue ArgumentError => e
-    if e.message[/invalid date/]
-      return nil
-    else
-      raise e
+    rescue ArgumentError => e
+      if e.message[/invalid date/]
+        return nil
+      else
+        raise e
     end
   end
 
@@ -87,7 +96,3 @@ class Whitehall::AnnouncementSearch
   end
 
 end
-
-# bundle exec rake environment tire:import CLASS='NewsArticle'
-# bundle exec rake environment tire:import CLASS='Speech'
-# bundle exec rake environment tire:import CLASS='FatalityNotice'
