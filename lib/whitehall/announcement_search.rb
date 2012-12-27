@@ -7,14 +7,25 @@ class Whitehall::AnnouncementSearch
     @page = params[:page]
     @direction = params[:direction]
     @date = parse_date
+    @announcement_type = params[:announcement_type]
+    @keywords = params[:keywords]
   end
 
   def published_search
     Tire.search "whitehall_announcements", load: true do |search|
-
-      search.query { all }
+      if @keywords.present?
+        search.query do |query|
+          query.string @keywords 
+        end
+      else
+        search.query { all }
+      end
      
       search.filter :term, state: "published"
+      
+      if @announcement_type.present?
+        search.filter :term, _type: @announcement_type
+      end
 
       if selected_topics.any?
         search.filter :term, topics: selected_topics.map(&:id)

@@ -2,6 +2,24 @@ class FatalityNotice < Announcement
   include Edition::RoleAppointments
   include Edition::FactCheckable
 
+  tire.index_name 'whitehall_announcements'
+
+  mapping do
+    indexes :id,                    index: :not_analyzed
+    indexes :title,                 analyzer: 'snowball', boost: 10
+    indexes :summary,               analyzer: 'snowball', boost: 5
+    indexes :indexable_content,     analyzer: 'snowball'
+    indexes :state,                 analyzer: 'keyword'
+    indexes :timestamp_for_sorting, type: 'date'
+    indexes :first_published_at,    type: 'date'
+    indexes :organisations,         type: 'string', 
+                                    analyzer: 'keyword',
+                                    as: 'organisations.map(&:id)'
+    indexes :topics,                type: 'string', 
+                                    analyzer: 'keyword', 
+                                    as: 'topics.map(&:id)'
+  end
+
   belongs_to :operational_field
 
   class CasualtiesTrait < Edition::Traits::Trait
@@ -20,8 +38,6 @@ class FatalityNotice < Announcement
 
   add_trait CasualtiesTrait
   
-  tire.index_name 'whitehall_announcements'
-
   def has_operational_field?
     true
   end

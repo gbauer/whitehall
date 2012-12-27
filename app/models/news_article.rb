@@ -5,17 +5,22 @@ class NewsArticle < Announcement
 
   tire.index_name 'whitehall_announcements'
 
-  def to_indexed_json
-    {
-      state: state,
-      timestamp_for_sorting: timestamp_for_sorting,
-      first_published_at: first_published_at,
-      organisations: organisations.map(&:id),
-      people: role_appointments.map(&:person_id),
-      topics: topics.map(&:id),
-      title: title,
-      description: summary,
-      content: indexable_content,
-    }.to_json
-  end
+  mapping do
+    indexes :id,                    index: :not_analyzed
+    indexes :title,                 analyzer: 'snowball', boost: 10
+    indexes :summary,               analyzer: 'snowball', boost: 5
+    indexes :indexable_content,     analyzer: 'snowball'
+    indexes :state,                 analyzer: 'keyword'
+    indexes :timestamp_for_sorting, type: 'date'
+    indexes :first_published_at,    type: 'date'
+    indexes :organisations,         type: 'string', 
+                                    analyzer: 'keyword', 
+                                    as: 'organisations.map(&:id)'
+    indexes :topics,                type: 'string', 
+                                    analyzer: 'keyword', 
+                                    as: 'topics.map(&:id)'
+    indexes :people,                type: 'string',
+                                    analyzer: 'keyword',
+                                    as: 'role_appointments.map(&:person_id)'
+  end  
 end
