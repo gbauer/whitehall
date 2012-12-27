@@ -15,6 +15,15 @@ class Whitehall::AnnouncementSearch
       search.query { all }
      
       search.filter :term, state: "published"
+
+      if selected_topics.any?
+        search.filter :term, topics: selected_topics.map(&:id)
+      end
+
+      if selected_organisations.any?
+        search.filter :term, organisations: selected_organisations.map(&:id)
+      end
+
       if @date.present? && @direction.present?
         case @direction
         when "before"
