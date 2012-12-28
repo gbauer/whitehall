@@ -37,7 +37,6 @@ class AnnouncementsController < PublicFacingController
     params[:direction] ||= "before"
     clean_malformed_params_array(:topics)
     clean_malformed_params_array(:departments)
-    document_filter = Whitehall::DocumentFilter.new(all_announcements, params)
     expire_on_next_scheduled_publication(scheduled_announcements)
     search = Whitehall::AnnouncementSearch.new(params)
     @filter = AnnouncementDecorator.new(search)
@@ -55,17 +54,8 @@ class AnnouncementsController < PublicFacingController
 
 private
 
-  def all_announcements
-    Announcement.published
-      .includes(:document, :organisations)
-  end
-
   def scheduled_announcements
-    @scheduled_announcements ||= begin
-      all_scheduled_announcements = Announcement.scheduled.order("scheduled_publication asc")
-      filter = Whitehall::DocumentFilter.new(all_scheduled_announcements, params.except(:direction))
-      filter.documents
-    end
+    @scheduled_announcements = Announcement.scheduled.order("scheduled_publication asc")
   end
 
 end
