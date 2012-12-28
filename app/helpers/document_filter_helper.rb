@@ -14,6 +14,11 @@ module DocumentFilterHelper
     options_for_select([["All publication types", "all"]] + publication_filter_options.map{ |pt| [pt.label, pt.slug] }, [selected_value])
   end
 
+  def announcement_type_filter_options(announcement_filter_options, selected_announcement_filter_options = nil)
+    selected_value = selected_announcement_filter_options ? selected_announcement_filter_options : ""
+    options_for_select([["All announcement types", "all"]] + announcement_filter_options.map{ |a| [a.humanize, a] }, [selected_value])   
+  end
+
   def all_topics_with(type)
     case type
     when :publication
@@ -34,4 +39,8 @@ module DocumentFilterHelper
   def publication_types_for_filter
     Whitehall::PublicationFilterOption.all
   end
+
+  def announcement_types_for_filter 
+    ["news_article", "speech", "statement", "fatality_notice"]
+  end 
 end

@@ -6,9 +6,11 @@ class Whitehall::AnnouncementSearch
     @per_page = params[:per_page] || 20
     @page = params[:page]
     @direction = params[:direction]
-    @date = parse_date
-    @announcement_type = params[:announcement_type]
+    @date = parse_date(@params[:date]) if @params[:date].present?
     @keywords = params[:keywords]
+
+    @announcement_type = params[:announcement_type]
+    @people_ids = @params[:people_id]
   end
 
   def only_published(search)
@@ -38,8 +40,31 @@ class Whitehall::AnnouncementSearch
   end
 
   def filter_by_type(search)
-    if @announcement_type.present?
-      search.filter :term, _type: @announcement_type
+    if @type.present?
+      search.filter :term, _type: @type
+    end
+  end
+
+
+  def filter_by_announcement_type(search)
+    unless @announcement_type == "all"
+      @type = @announcement_type
+      case @type
+      when "speech"
+        speech_ids = [SpeechType::Transcript, SpeechType::DraftText, SpeechType::SpeakingNotes].map(&:id)
+        search.filter :term, speech_type: speech_ids
+      when "statement"
+        statement_ids = [SpeechType::WrittenStatement, SpeechType::OralStatement].map(&:id)
+        search.filter :term, speech_type: statement_ids
+      else
+        filter_by_type(search)
+      end
+    end
+  end
+
+  def filter_by_people(search)
+    if @people_ids.present? && @people_ids != [""]
+      search.filter :term, people: @people_ids.map(&:to_i)
     end
   end
 
@@ -61,13 +86,14 @@ class Whitehall::AnnouncementSearch
     search.from( @page.to_i <= 1 ? 0 : (@per_page.to_i * (@page.to_i-1)) )
   end
 
-  def published_search
+  def published_announcement_search
     @results ||= Tire.search "whitehall_announcements", load: {include: [:document, :organisations]} do |search|
       keyword_search(search)     
       only_published(search)      
-      filter_by_type(search)
+      filter_by_announcement_type(search)
       filter_topics(search)
       filter_organisations(search)
+      filter_by_people(search)
       filter_date_and_sort(search)
       paginate(search)
     end
@@ -86,16 +112,24 @@ class Whitehall::AnnouncementSearch
     Whitehall::PublicationFilterOption.find_by_slug(filter_option)
   end
 
+  def selected_announcement_type_option
+    @announcement_type
+  end
+
+  def selected_people_option
+    @people_ids
+  end
+
   def keywords
-    if @params[:keywords].present?
-      @params[:keywords].strip.split(/\s+/)
+    if @keywords.present?
+      @keywords.strip.split(/\s+/)
     else
       []
     end
   end
 
-  def parse_date
-    Date.parse(@params[:date]) if @params[:date].present?
+  def parse_date(date)
+    Date.parse(date)
     rescue ArgumentError => e
       if e.message[/invalid date/]
         return nil
