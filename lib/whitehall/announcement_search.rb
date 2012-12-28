@@ -11,68 +11,66 @@ class Whitehall::AnnouncementSearch
     @keywords = params[:keywords]
   end
 
+  def only_published(search)
+    search.filter :term, state: "published"
+  end
+
+  def keyword_search(search)
+    if @keywords.present?
+      search.query do |query|
+        query.string @keywords 
+      end
+    else
+      search.query { all }
+    end
+  end
+
+  def filter_topics(search)
+    if selected_topics.any?
+      search.filter :term, topics: selected_topics.map(&:id)
+    end
+  end
+
+  def filter_organisations(search)
+    if selected_organisations.any?
+      search.filter :term, organisations: selected_organisations.map(&:id)
+    end
+  end
+
+  def filter_by_type(search)
+    if @announcement_type.present?
+      search.filter :term, _type: @announcement_type
+    end
+  end
+
+  def filter_date_and_sort(search)
+    if @date.present? && @direction.present?
+      case @direction
+      when "before"
+        search.filter :range, timestamp_for_sorting: {to: @date - 1.day}
+        search.sort { by :timestamp_for_sorting, :desc }
+      when "after"
+        search.filter :range, timestamp_for_sorting: {from: @date }
+        search.sort { by :timestamp_for_sorting}
+      end
+    end
+  end
+
+  def paginate(search)
+    search.size @per_page
+    search.from( @page.to_i <= 1 ? 0 : (@per_page.to_i * (@page.to_i-1)) )
+  end
+
   def published_search
-    Tire.search "whitehall_announcements", load: true do |search|
-      if @keywords.present?
-        search.query do |query|
-          query.string @keywords 
-        end
-      else
-        search.query { all }
-      end
-     
-      search.filter :term, state: "published"
-      
-      if @announcement_type.present?
-        search.filter :term, _type: @announcement_type
-      end
-
-      if selected_topics.any?
-        search.filter :term, topics: selected_topics.map(&:id)
-      end
-
-      if selected_organisations.any?
-        search.filter :term, organisations: selected_organisations.map(&:id)
-      end
-
-      if @date.present? && @direction.present?
-        case @direction
-        when "before"
-          search.filter :range, timestamp_for_sorting: {to: @date - 1.day}
-          search.sort { by :timestamp_for_sorting, :desc }
-        when "after"
-          search.filter :range, timestamp_for_sorting: {from: @date }
-          search.sort { by :timestamp_for_sorting}
-        end
-      end
-      search.size @per_page
-      search.from( @page.to_i <= 1 ? 0 : (@per_page.to_i * (@page.to_i-1)) )
+    @results ||= Tire.search "whitehall_announcements", load: {include: [:document, :organisations]} do |search|
+      keyword_search(search)     
+      only_published(search)      
+      filter_by_type(search)
+      filter_topics(search)
+      filter_organisations(search)
+      filter_date_and_sort(search)
+      paginate(search)
     end
-  end
-
-  def all_topics
-    Topic.with_content.order(:name)
-  end
-
-  def all_topics_with(type)
-    case type
-    when :publication
-      Topic.with_related_publications.sort_by(&:name)
-    when :detailed_guide
-      Topic.with_related_detailed_guides.order(:name)
-    when :announcement
-      Topic.with_related_announcements.order(:name)
-    when :policy
-      Topic.with_related_policies.order(:name)
-    end
-  end
-
-  def all_organisations_with(type)
-    Organisation.joins(:"published_#{type.to_s.pluralize}").group(:name).ordered_by_name_ignoring_prefix
-  end
-
-  def publication_types_for_filter
-    Whitehall::PublicationFilterOption.all
   end
 
   def selected_topics
