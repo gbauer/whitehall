@@ -19,7 +19,7 @@ class Speech < Announcement
                                     as: 'topics.map(&:id)'
     indexes :people,                type: 'string',
                                     analyzer: 'keyword',
-                                    as: 'role_appointment.person_id'
+                                    as: '[role_appointment.person_id]'
     indexes :delivered_on,          type: 'date'
     indexes :speech_type,           type: 'integer',
                                     as: 'speech_type.id'

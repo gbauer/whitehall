@@ -17,6 +17,12 @@ class Announcement < Edition
 
   tire.index_name 'whitehall_announcements'
 
+  settings index: {
+    mapper: {
+      dynamic: false
+    }
+  }
+
 end
 
 require_relative 'news_article'
