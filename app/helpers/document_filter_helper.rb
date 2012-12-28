@@ -13,4 +13,25 @@ module DocumentFilterHelper
     selected_value = selected_publication_filter_options ? selected_publication_filter_options.slug : "all"
     options_for_select([["All publication types", "all"]] + publication_filter_options.map{ |pt| [pt.label, pt.slug] }, [selected_value])
   end
+
+  def all_topics_with(type)
+    case type
+    when :publication
+      Topic.with_related_publications.sort_by(&:name)
+    when :detailed_guide
+      Topic.with_related_detailed_guides.order(:name)
+    when :announcement
+      Topic.with_related_announcements.order(:name)
+    when :policy
+      Topic.with_related_policies.order(:name)
+    end
+  end
+
+  def all_organisations_with(type)
+    Organisation.joins(:"published_#{type.to_s.pluralize}").group(:name).ordered_by_name_ignoring_prefix
+  end
+
+  def publication_types_for_filter
+    Whitehall::PublicationFilterOption.all
+  end
 end
