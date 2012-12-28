@@ -3,14 +3,6 @@ require 'test_helper'
 class DocumentFilterTest < ActiveSupport::TestCase
   include DocumentFilterHelpers
 
-  test "#all_topics returns all topics with content, alphabetically" do
-    scope = stub('topic scope')
-    scope.expects(:order).with(:name)
-    Topic.expects(:with_content).returns(scope)
-
-    Whitehall::DocumentFilter.new([]).all_topics
-  end
-
   test "#all_topics_with :announcement returns all topics with announcements, alphabetically" do
     scope = stub('topic scope')
     scope.expects(:order).with(:name)
