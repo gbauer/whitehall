@@ -3,6 +3,8 @@ class AttachmentData < ActiveRecord::Base
 
   delegate :url, to: :file, allow_nil: true
 
+  has_one :attachment
+
   before_save :update_file_attributes
 
   validates :file, presence: true
