@@ -44,4 +44,6 @@ Whitehall::Application.configure do
   # Log SQL
   ActiveRecord::Base.logger = Logger.new(STDOUT)
 
+  # Log SQL trigger lines
+  QueryTrace.enable!
 end
