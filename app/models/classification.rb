@@ -76,8 +76,28 @@ class Classification < ActiveRecord::Base
   end
 
   def self.with_related_announcements
+    # FIX gbauer
+    # Erroneous query was: SELECT [classifications].* FROM [classifications] INNER JOIN [classification_memberships] ON [classification_memberships].[classification_id] = [classifications].[id] INNER JOIN [editions] ON [editions].[id] = [classification_memberships].[edition_id] AND [editions].[type] IN (N''Policy'') AND [editions].[state] = N''published'' WHERE [classifications].[type] IN (N''Topic'') AND ([classifications].[state] != N''deleted'') AND (EXISTS (
+    #    SELECT * FROM edition_relations er_check
+    #    JOIN editions announcement_check
+    #      ON announcement_check.id=er_check.edition_id
+    #        AND announcement_check.state=''published''
+    #    WHERE
+    #      er_check.document_id=editions.document_id AND
+    #      announcement_check.type in (N''Announcement'',N''NewsArticle'',N''Speech'',N''FatalityNotice'')
+    #      )) GROUP BY [classifications].[id] ORDER BY name ASC'
+    # Fixed query is:
+    # SELECT DISTINCT [classifications].* FROM [classifications] INNER JOIN [classification_memberships] ON [classification_memberships].[classification_id] = [classifications].[id] INNER JOIN [editions] ON [editions].[id] = [classification_memberships].[edition_id] AND [editions].[type] IN (N''Policy'') AND [editions].[state] = N''published'' WHERE [classifications].[type] IN (N''Topic'') AND ([classifications].[state] != N''deleted'') AND (EXISTS (
+	#    SELECT * FROM edition_relations er_check
+	#    JOIN editions announcement_check
+	#      ON announcement_check.id=er_check.edition_id
+	#        AND announcement_check.state=''published''
+	#    WHERE
+	#      er_check.document_id=editions.document_id AND
+	#      announcement_check.type in (N''Announcement'',N''NewsArticle'',N''Speech'',N''FatalityNotice'')
+	#      )) ORDER BY name ASC
     joins(:published_policies).
-      group(arel_table[:id]).
+      uniq.
       where("EXISTS (
         SELECT * FROM edition_relations er_check
         JOIN editions announcement_check
