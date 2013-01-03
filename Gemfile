@@ -3,7 +3,7 @@ source 'https://gems.gemfury.com/vo6ZrmjBQu5szyywDszE/'
 
 gem 'delayed_job_active_record'
 gem 'statsd-ruby', '1.0.0', require: "statsd"
-gem 'rails', '3.1.7'
+gem 'rails', '3.2.8'
 gem 'mysql2'
 gem 'jquery-rails'
 gem 'transitions', require: ['transitions', 'active_record/transitions']
@@ -13,7 +13,7 @@ gem 'kramdown', git: 'https://github.com/alphagov/kramdown.git', branch: "add-ge
 gem 'validates_email_format_of'
 gem 'friendly_id', '4.0.0.beta14'
 gem 'nokogiri'
-gem 'rake', '0.9.2'
+#gem 'rake', '0.9.2'
 gem 'boomerang-rails'
 gem 'slimmer', '3.10.0'
 gem 'plek', '0.5.0'
@@ -27,7 +27,7 @@ gem 'exception_notification', require: 'exception_notifier'
 gem 'rabl'
 gem "paper_trail"
 gem 'aws-ses', require: 'aws/ses'
-gem 'draper'
+gem 'draper', '0.18.0'
 gem 'newrelic_rpm', '3.5.3.25'
 gem 'lograge'
 gem 'unicorn'
@@ -39,9 +39,9 @@ gem 'mini_magick'
 
 group :assets do
   gem 'govuk_frontend_toolkit', '0.9.0'
-  gem 'sass', '3.2.1'
-  gem 'sass-rails', '3.1.4'
-  gem 'uglifier'
+  #gem 'sass', '3.2.1'
+  gem 'sass-rails', '~> 3.2.3'
+  gem 'uglifier', '>=1.0.3'
 end
 
 group :development, :staging, :test do
@@ -57,7 +57,7 @@ group :test do
   gem 'factory_girl'
   gem 'hash_syntax'
   gem 'mocha', '0.10.0', require: false
-  gem 'test_track'
+  gem 'test_track', github: "episko/test_track"
   gem 'timecop'
   gem 'webmock', require: false
   gem 'minitest', '2.5.1'
@@ -80,3 +80,4 @@ end
 group :router do
   gem 'router-client', '~> 3.0.1', require: 'router'
 end
+
