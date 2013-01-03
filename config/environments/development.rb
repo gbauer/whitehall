@@ -40,4 +40,8 @@ Whitehall::Application.configure do
       end
     end
   end
+
+  # Log SQL
+  ActiveRecord::Base.logger = Logger.new(STDOUT)
+
 end
