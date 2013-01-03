@@ -39,7 +39,10 @@ class Whitehall::DocumentFilter
   end
 
   def all_organisations_with(type)
-    Organisation.joins(:"published_#{type.to_s.pluralize}").group(:name).ordered_by_name_ignoring_prefix
+    # FIX gbauer
+    # Erroneous query was: SELECT [organisations].* FROM [organisations] INNER JOIN [edition_organisations] ON [edition_organisations].[organisation_id] = [organisations].[id] INNER JOIN [editions] ON [editions].[id] = [edition_organisations].[edition_id] AND [editions].[type] IN (N''Policy'') AND [editions].[state] = N''published'' GROUP BY name ORDER BY [organisations].[name] ASC
+    # Changed query is: SELECT DISTINCT [organisations].* FROM [organisations] INNER JOIN [edition_organisations] ON [edition_organisations].[organisation_id] = [organisations].[id] INNER JOIN [editions] ON [editions].[id] = [edition_organisations].[edition_id] AND [editions].[type] IN (N''Policy'') AND [editions].[state] = N''published'' ORDER BY [organisations].[name] ASC
+    Organisation.joins(:"published_#{type.to_s.pluralize}").uniq.ordered_by_name_ignoring_prefix
   end
 
   def publication_types_for_filter

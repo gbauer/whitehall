@@ -94,7 +94,10 @@ class Classification < ActiveRecord::Base
   end
 
   def self.with_related_policies
-    joins(:published_policies).group(arel_table[:id])
+    # FIX gbauer
+    # Erroneous query was: SELECT [classifications].* FROM [classifications] INNER JOIN [classification_memberships] ON [classification_memberships].[classification_id] = [classifications].[id] INNER JOIN [editions] ON [editions].[id] = [classification_memberships].[edition_id] AND [editions].[type] IN (N''Policy'') AND [editions].[state] = N''published'' WHERE [classifications].[type] IN (N''Topic'') AND ([classifications].[state] != N''deleted'') GROUP BY [classifications].[id] ORDER BY name ASC'
+    # Changed query is: SELECT DISTINCT [classifications].* FROM [classifications] INNER JOIN [classification_memberships] ON [classification_memberships].[classification_id] = [classifications].[id] INNER JOIN [editions] ON [editions].[id] = [classification_memberships].[edition_id] AND [editions].[type] IN (N''Policy'') AND [editions].[state] = N''published'' WHERE [classifications].[type] IN (N''Topic'') AND ([classifications].[state] != N''deleted'') ORDER BY name ASC
+    joins(:published_policies).uniq
   end
 
   scope :alphabetical, order("name ASC")
