@@ -81,3 +81,7 @@ group :router do
   gem 'router-client', '~> 3.0.1', require: 'router'
 end
 
+gem 'tiny_tds', "~> 0.6.0.rc1"
+gem "activerecord-sqlserver-adapter", "~> 3.2.10"
+
+
